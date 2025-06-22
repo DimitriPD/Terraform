@@ -42,3 +42,8 @@ variable "management_snet_id" {
   description = "ID of the management subnet for the Azure Firewall"
   type        = string
 }
+
+variable "pip_id" {
+  description = "ID of the public IP address to associate with the Azure Firewall management configuration"
+  type        = string
+}

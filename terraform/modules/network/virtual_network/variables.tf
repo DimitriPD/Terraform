@@ -34,5 +34,5 @@ variable "private_endpoint_vnet_policies" {
   description = "Private endpoint policies for the virtual network"
   type        = string
 
-  default = "Basic"
+  default = "Disabled"
 }

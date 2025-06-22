@@ -8,6 +8,7 @@ locals {
   firewall_policy_id = var.firewall_policy_id
   snet_id            = var.snet_id
   management_snet_id = var.management_snet_id
+  pip_id             = var.pip_id
 }
 
 resource "azurerm_firewall" "afw" {
@@ -24,8 +25,9 @@ resource "azurerm_firewall" "afw" {
     subnet_id = local.snet_id
   }
 
-  ip_configuration {
-    name      = "management"
-    subnet_id = local.management_snet_id
+  management_ip_configuration {
+    name                 = "management"
+    subnet_id            = local.management_snet_id
+    public_ip_address_id = local.pip_id
   }
 }

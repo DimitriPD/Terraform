@@ -38,3 +38,13 @@ variable "private_endpoint_network_policies" {
   type        = string
   default     = "Enabled"
 }
+
+variable "delegations" {
+  description = "List of delegations for the subnet"
+  type = list(object({
+    name                    = string
+    service_delegation_name = string
+    actions                 = list(string)
+  }))
+  default = []
+}

@@ -7,24 +7,40 @@ locals {
     snet_firewall_management = {
       name             = "AzureFirewallManagementSubnet"
       address_prefixes = ["10.0.0.0/26"]
+      delegations = []
     },
     snet_firewall = {
       name             = "AzureFirewallSubnet"
       address_prefixes = ["10.0.0.128/26"]
+      delegations = []
     },
     snet_A = {
       name             = "snet-A-${local.env}"
       address_prefixes = ["10.0.1.0/24"]
+      delegations = []
     },
     snet_B = {
       name             = "snet-B-${local.env}"
       address_prefixes = ["10.0.2.0/24"]
+      delegations = []
     },
     snet_C = {
       name             = "snet-C-${local.env}"
       address_prefixes = ["10.0.3.0/24"]
+      delegations = [
+        {
+          name                    = "web"
+          service_delegation_name = "Microsoft.Web/serverFarms"
+          actions                 = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+        }
+      ]
     }
   }
+
+  # Public IP
+  pip_name              = "pip-infra-${local.env}"
+  pip_allocation_method = "Static"
+  pip_sku               = "Basic"
 
   # Azurerm Firewall Policy
   afwp_name = "afwp-infra-${local.env}"
@@ -341,11 +357,25 @@ module "snet_infra" {
   vnet_name        = local.vnet_name
   snet_name        = each.value.name
   address_prefixes = each.value.address_prefixes
+  delegations      = each.value.delegations
 
   depends_on = [
     module.rg_infra,
     module.vnet_infra
   ]
+}
+
+module "pip_infra" {
+  source = "../modules/network/public_ip"
+
+  region            = local.region
+  tags              = local.tags
+  rg_name           = local.rg_infra_name
+  pip_name          = local.pip_name
+  allocation_method = local.pip_allocation_method
+  sku               = local.pip_sku
+
+  depends_on = [module.rg_infra]
 }
 
 module "afwp_infra" {
@@ -375,11 +405,13 @@ module "afw_infra" {
   firewall_policy_id = local.afw_firewall_policy_id
   snet_id            = local.afw_snet_id
   management_snet_id = local.afw_management_snet_id
+  pip_id             = module.pip_infra.id
 
   depends_on = [
     module.rg_infra,
     module.snet_infra,
-    module.afwp_infra
+    module.afwp_infra,
+    module.pip_infra
   ]
 }
 
