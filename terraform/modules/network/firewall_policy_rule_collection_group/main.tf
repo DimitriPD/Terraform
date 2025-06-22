@@ -2,8 +2,7 @@ locals {
   firewall_policy_id = var.firewall_policy_id
   afwp_rcg_name      = var.afwp_rcg_name
   priority           = var.priority
-  action             = var.action
-  rules              = var.rules
+  collections        = var.collections
 }
 
 resource "azurerm_firewall_policy_rule_collection_group" "afwp_rcg" {
@@ -12,18 +11,21 @@ resource "azurerm_firewall_policy_rule_collection_group" "afwp_rcg" {
   priority           = local.priority
 
   dynamic "network_rule_collection" {
-    for_each = local.rules
+    for_each = local.collections
     content {
       name     = network_rule_collection.value.name
-      action   = local.action
-      priority = local.priority
+      action   = network_rule_collection.value.action
+      priority = network_rule_collection.value.priority
 
-      rule {
-        name                  = network_rule_collection.value.name
-        source_addresses      = network_rule_collection.value.source_addresses
-        destination_ports     = network_rule_collection.value.destination_ports
-        destination_addresses = network_rule_collection.value.destination_addresses
-        protocols             = network_rule_collection.value.protocols
+      dynamic "rule" {
+        for_each = network_rule_collection.value.rules
+        content {
+          name                  = rule.value.name
+          source_addresses      = rule.value.source_addresses
+          destination_ports     = rule.value.destination_ports
+          destination_addresses = rule.value.destination_addresses
+          protocols             = rule.value.protocols
+        }
       }
     }
   }

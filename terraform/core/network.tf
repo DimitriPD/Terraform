@@ -62,58 +62,63 @@ locals {
 
   # Azure Firewall Rule Collection Group
   afw_rcg_firewall_policy_id = module.afwp_infra.id
-  afw_rcg_net_list = {
-    afw_net_coll_allow = {
-      name     = "Net-Coll-Allow-${local.env}"
+  afw_rcg_list = {
+    net_rcg = {
+      name     = "Net-Coll-${local.env}"
       priority = 100
-      action   = "Allow"
-      rules = [
+      collections = [
         {
-          name                  = "Allow-ICMP-Snet-A-to-Snet-B"
-          source_addresses      = [module.snet_infra["snet_A"].address_prefixes[0]]
-          destination_ports     = ["*"]
-          destination_addresses = [module.snet_infra["snet_B"].address_prefixes[0]]
-          protocols             = ["ICMP"]
+          name     = "Allow-Protocols-${local.env}"
+          priority = 100
+          action   = "Allow"
+          rules = [
+            {
+              name                  = "Allow-ICMP-Snet-A-to-Snet-B"
+              source_addresses      = [module.snet_infra["snet_A"].address_prefixes[0]]
+              destination_ports     = ["*"]
+              destination_addresses = [module.snet_infra["snet_B"].address_prefixes[0]]
+              protocols             = ["ICMP"]
+            },
+            {
+              name                  = "Allow-ICMP-Snet-B-to-Snet-A"
+              source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
+              destination_ports     = ["*"]
+              destination_addresses = [module.snet_infra["snet_A"].address_prefixes[0]]
+              protocols             = ["ICMP"]
+            },
+            {
+              name                  = "Allow-HTTPS-Snet-B-to-Function"
+              source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
+              destination_ports     = ["443"]
+              destination_addresses = [module.pep_infra["pep_func"].private_endpoint_ip]
+              protocols             = ["TCP"]
+            }
+          ]
         },
         {
-          name                  = "Allow-ICMP-Snet-B-to-Snet-A"
-          source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
-          destination_ports     = ["*"]
-          destination_addresses = [module.snet_infra["snet_A"].address_prefixes[0]]
-          protocols             = ["ICMP"]
-        },
-        {
-          name                  = "Allow-HTTPS-Snet-B-to-Function"
-          source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
-          destination_ports     = ["443"]
-          destination_addresses = [module.pep_infra["pep_func"].private_endpoint_ip]
-          protocols             = ["TCP"]
-        }
-      ]
-    },
-    afw_net_coll_deny = {
-      name     = "Net-Coll-Deny-${local.env}"
-      priority = 200
-      action   = "Deny"
-      rules = [
-        {
-          name                  = "Deny-All-Inbound"
-          source_addresses      = ["*"]
-          destination_ports     = ["*"]
-          destination_addresses = ["*"]
-          protocols             = ["Any"]
-        },
-        {
-          name                  = "Deny-All-Outbound"
-          source_addresses      = ["*"]
-          destination_ports     = ["*"]
-          destination_addresses = ["*"]
-          protocols             = ["Any"]
+          name     = "Deny-All-${local.env}"
+          priority = 200
+          action   = "Deny"
+          rules = [
+            {
+              name                  = "Deny-All-Inbound"
+              source_addresses      = ["*"]
+              destination_ports     = ["*"]
+              destination_addresses = ["*"]
+              protocols             = ["Any"]
+            },
+            {
+              name                  = "Deny-All-Outbound"
+              source_addresses      = ["*"]
+              destination_ports     = ["*"]
+              destination_addresses = ["*"]
+              protocols             = ["Any"]
+            }
+          ]
         }
       ]
     }
   }
-
 
   # Private Endpoint
   pep_list = {
@@ -313,9 +318,9 @@ locals {
         },
         {
           name                   = "udr-to-function-pep"
-          address_prefix         = module.pep_infra["pep_func"].private_endpoint_ip
+          address_prefix         = "${module.pep_infra["pep_func"].private_endpoint_ip}/32"
           next_hop_type          = "VirtualAppliance"
-          next_hop_in_ip_address = "${module.afw_infra.private_firewall_ip}/32"
+          next_hop_in_ip_address = module.afw_infra.private_firewall_ip
         }
       ]
     },
@@ -425,13 +430,12 @@ module "afw_infra" {
 module "afwp_rcg_infra" {
   source = "../modules/network/firewall_policy_rule_collection_group"
 
-  for_each = local.afw_rcg_net_list
+  for_each = local.afw_rcg_list
 
   firewall_policy_id = local.afw_rcg_firewall_policy_id
   afwp_rcg_name      = each.value.name
   priority           = each.value.priority
-  action             = each.value.action
-  rules              = each.value.rules
+  collections        = each.value.collections
 
   depends_on = [module.afw_infra]
 }

@@ -13,19 +13,18 @@ variable "priority" {
   type        = number
 }
 
-variable "action" {
-  description = "Action of the Azure Firewall Network Rule Collection (Allow/Deny)"
-  type        = string
-}
-
-variable "rules" {
-  description = "List of rules for the Azure Firewall Network Rule Collection"
+variable "collections" {
+  description = "List of collections for the Azure Firewall Policy Rule Collection Group"
   type = list(object({
-    name                  = string
-    source_addresses      = list(string)
-    destination_ports     = list(string)
-    destination_addresses = list(string)
-    protocols             = list(string)
+    name     = string
+    action   = string
+    priority = number
+    rules = list(object({
+      name                  = string
+      source_addresses      = list(string)
+      destination_ports     = list(string)
+      destination_addresses = list(string)
+      protocols             = list(string)
+    }))
   }))
-  default = []
 }
