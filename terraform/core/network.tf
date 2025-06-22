@@ -3,7 +3,7 @@ locals {
   vnet_name = "vnet-infra-${local.env}"
 
   # Subnet
-  snet_list = {
+  snet_map = {
     snet_firewall_management = {
       name             = "AzureFirewallManagementSubnet"
       address_prefixes = ["10.0.0.0/26"]
@@ -40,16 +40,19 @@ locals {
         }
       ]
     }
-
   }
 
   # Public IP
-  pip_name              = "pip-infra-${local.env}"
-  pip_allocation_method = "Static"
-  pip_sku               = "Standard"
+  pip_map = {
+    pip_afw = {
+      name              = "pip-afw-${local.env}"
+      allocation_method = "Static"
+      sku               = "Standard"
+    }
+  }
 
   # Network Interface
-  nic_list = {
+  nic_map = {
     nic_VM_A = {
       name      = "nic-VM-A-${local.env}"
       subnet_id = module.snet_infra["snet_A"].id
@@ -74,7 +77,7 @@ locals {
 
   # Azure Firewall Rule Collection Group
   afw_rcg_firewall_policy_id = module.afwp_infra.id
-  afw_rcg_list = {
+  afw_rcg_map = {
     net_rcg = {
       name     = "DefaultNetworkRuleCollectionGroup"
       priority = 100
@@ -133,7 +136,7 @@ locals {
   }
 
   # Private Endpoint
-  pep_list = {
+  pep_map = {
     pep_func = {
       name    = "pep-func-${local.env}"
       snet_id = module.snet_infra["snet_C"].id
@@ -149,7 +152,7 @@ locals {
   }
 
   # Network Security Group
-  nsg_list = {
+  nsg_map = {
     nsg_A = {
       name = "nsg-A-${local.env}"
       security_rules = [
@@ -327,7 +330,7 @@ locals {
   }
 
   # Subnet Network Security Group Association
-  snet_nsg_assoc_list = {
+  snet_nsg_assoc_map = {
     snet_A           = "nsg_A"
     snet_B           = "nsg_B"
     snet_C           = "nsg_C"
@@ -335,7 +338,7 @@ locals {
   }
 
   # Route Table
-  rt_list = {
+  rt_map = {
     rt_A = {
       name = "rt-A-${local.env}"
       routes = [
@@ -389,7 +392,7 @@ locals {
   }
 
   # Subnet Route Table Association
-  snet_rt_assoc_list = {
+  snet_rt_assoc_map = {
     snet_A           = "rt_A"
     snet_B           = "rt_B"
     snet_C           = "rt_C"
@@ -412,7 +415,7 @@ module "vnet_infra" {
 module "snet_infra" {
   source = "../modules/network/subnet"
 
-  for_each = local.snet_list
+  for_each = local.snet_map
 
   env              = local.env
   region           = local.region
@@ -432,12 +435,14 @@ module "snet_infra" {
 module "pip_infra" {
   source = "../modules/network/public_ip"
 
+  for_each = local.pip_map
+
   region            = local.region
   tags              = local.tags
   rg_name           = local.rg_infra_name
-  pip_name          = local.pip_name
-  allocation_method = local.pip_allocation_method
-  sku               = local.pip_sku
+  pip_name          = each.value.name
+  allocation_method = each.value.allocation_method
+  sku               = each.value.sku
 
   depends_on = [module.rg_infra]
 }
@@ -445,7 +450,7 @@ module "pip_infra" {
 module "nic_infra" {
   source = "../modules/network/network_interface"
 
-  for_each = local.nic_list
+  for_each = local.nic_map
 
   region    = local.region
   tags      = local.tags
@@ -483,7 +488,7 @@ module "afw_infra" {
   firewall_policy_id = local.afw_firewall_policy_id
   snet_id            = local.afw_snet_id
   management_snet_id = local.afw_management_snet_id
-  pip_id             = module.pip_infra.id
+  pip_id             = module.pip_infra["pip_afw"].id
 
   depends_on = [
     module.rg_infra,
@@ -497,7 +502,7 @@ module "afw_infra" {
 module "afwp_rcg_infra" {
   source = "../modules/network/firewall_policy_rule_collection_group"
 
-  for_each = local.afw_rcg_list
+  for_each = local.afw_rcg_map
 
   firewall_policy_id = local.afw_rcg_firewall_policy_id
   afwp_rcg_name      = each.value.name
@@ -510,7 +515,7 @@ module "afwp_rcg_infra" {
 module "pep_infra" {
   source = "../modules/network/private_endpoint"
 
-  for_each = local.pep_list
+  for_each = local.pep_map
 
   env                         = local.env
   region                      = local.region
@@ -530,7 +535,7 @@ module "pep_infra" {
 module "nsg_infra" {
   source = "../modules/network/network_security_group"
 
-  for_each = local.nsg_list
+  for_each = local.nsg_map
 
   env            = local.env
   region         = local.region
@@ -548,7 +553,7 @@ module "nsg_infra" {
 module "snet_nsg_assoc" {
   source = "../modules/network/association/subnet_network_security_group_association"
 
-  for_each = local.snet_nsg_assoc_list
+  for_each = local.snet_nsg_assoc_map
 
   subnet_id = module.snet_infra[each.key].id
   nsg_id    = module.nsg_infra[each.value].id
@@ -562,7 +567,7 @@ module "snet_nsg_assoc" {
 module "rt_infra" {
   source = "../modules/network/route_table"
 
-  for_each = local.rt_list
+  for_each = local.rt_map
 
   env     = local.env
   region  = local.region
@@ -577,7 +582,7 @@ module "rt_infra" {
 module "snet_rt_assoc" {
   source = "../modules/network/association/subnet_route_table_association"
 
-  for_each = local.snet_rt_assoc_list
+  for_each = local.snet_rt_assoc_map
 
   snet_id = module.snet_infra[each.key].id
   rt_id   = module.rt_infra[each.value].id

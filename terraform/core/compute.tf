@@ -1,6 +1,6 @@
 locals {
   # Linux Virtual Machines
-  vm_linux_list = {
+  vm_linux_map = {
     "vm_A" = {
       vm_name               = "vm-A-${local.env}"
       size                  = "Standard_B1s"
@@ -25,7 +25,7 @@ locals {
 module "vm_service" {
   source = "../modules/compute/linux_virtual_machine"
 
-  for_each = local.vm_linux_list
+  for_each = local.vm_linux_map
 
   region                = local.region
   tags                  = local.tags
