@@ -87,7 +87,7 @@ locals {
               protocols             = ["ICMP"]
             },
             {
-              name                  = "Allow-HTTPS-Snet-B-to-Function"
+              name                  = "Allow-HTTPS-Snet-B-to-Function-PEP"
               source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
               destination_ports     = ["443"]
               destination_addresses = [module.pep_infra["pep_func"].private_endpoint_ip]
@@ -284,6 +284,33 @@ locals {
           destination_address_prefix = "*"
         }
       ]
+    },
+    nsg_C_Delegated = {
+      name = "nsg-C-Delegated-${local.env}"
+      security_rules = [
+        {
+          name                       = "Deny-All-Inbound"
+          protocol                   = "*"
+          source_port_range          = "*"
+          destination_port_range     = "*"
+          source_address_prefix      = "*"
+          priority                   = 300
+          direction                  = "Inbound"
+          access                     = "Deny"
+          destination_address_prefix = "*"
+        },
+        {
+          name                       = "Deny-All-Outbound"
+          protocol                   = "*"
+          source_port_range          = "*"
+          destination_port_range     = "*"
+          source_address_prefix      = "*"
+          priority                   = 300
+          direction                  = "Outbound"
+          access                     = "Deny"
+          destination_address_prefix = "*"
+        }
+      ]
     }
   }
 
@@ -292,6 +319,7 @@ locals {
     snet_A = "nsg_A"
     snet_B = "nsg_B"
     snet_C = "nsg_C"
+    nsg_C_Delegated = "snet_C_Delegated"
   }
 
   # Route Table
@@ -334,6 +362,17 @@ locals {
           next_hop_in_ip_address = module.afw_infra.private_firewall_ip
         }
       ]
+    },
+    rt_C_Delegated = {
+      name = "rt-C-Delegated-${local.env}"
+      routes = [
+        {
+          name                   = "udr-${module.snet_infra["snet_C_Delegated"].name}"
+          address_prefix         = module.snet_infra["snet_C_Delegated"].address_prefixes[0]
+          next_hop_type          = "VirtualAppliance"
+          next_hop_in_ip_address = module.afw_infra.private_firewall_ip
+        }
+      ]
     }
   }
 
@@ -342,6 +381,7 @@ locals {
     snet_A = "rt_A"
     snet_B = "rt_B"
     snet_C = "rt_C"
+    snet_C_Delegated = "rt_C_Delegated"
   }
 }
 

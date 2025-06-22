@@ -6,3 +6,4 @@ https://learn.microsoft.com/en-us/azure/networking/fundamentals/networking-overv
 https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/virtualNetworks/subnets?pivots=deployment-language-terraform
 https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table#prerequisites
 https://learn.microsoft.com/pt-br/azure/private-link/private-endpoint-overview#private-link-resource
+https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#permissions
