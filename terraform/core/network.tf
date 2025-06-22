@@ -30,7 +30,7 @@ locals {
       delegations      = []
     },
     snet_C_Delegated = {
-      name             = "snet-C-${local.env}"
+      name             = "snet-C-Delegated-${local.env}"
       address_prefixes = ["10.0.4.0/24"]
       delegations = [
         {
