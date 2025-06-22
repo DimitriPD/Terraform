@@ -129,6 +129,7 @@ Este projeto provisiona uma infraestrutura completa no Azure utilizando Terrafor
 - [Azure App Service VNet Integration](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#permissions)
 - [Azure VM Sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview?tabs=breakdownseries%2Cgeneralsizelist%2Ccomputesizelist%2Cmem-e-fam%2Cstoragesizelist%2Cgpusizelist%2Cfpgasizelist%2Chpcsizelist#list-of-vm-size-families-by-type)
 - [Azure VM Resource (Terraform)](https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?pivots=deployment-language-bicep#usage-examples)
+- ChatGPT e GitHub Copilot tambem auxiliaram esse projeto.
 
 ## Como usar
 
