@@ -31,7 +31,7 @@ module "func_service" {
   st_name                   = module.st_services.name
   st_primary_access_key     = module.st_services.primary_access_key
   asp_id                    = module.asp_service.id
-  virtual_network_subnet_id = module.snet_infra["snet_C"].id
+  virtual_network_subnet_id = module.snet_infra["snet_C_Delegated"].id
 
   depends_on = [
     module.rg_services,

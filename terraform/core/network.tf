@@ -7,26 +7,31 @@ locals {
     snet_firewall_management = {
       name             = "AzureFirewallManagementSubnet"
       address_prefixes = ["10.0.0.0/26"]
-      delegations = []
+      delegations      = []
     },
     snet_firewall = {
       name             = "AzureFirewallSubnet"
       address_prefixes = ["10.0.0.128/26"]
-      delegations = []
+      delegations      = []
     },
     snet_A = {
       name             = "snet-A-${local.env}"
       address_prefixes = ["10.0.1.0/24"]
-      delegations = []
+      delegations      = []
     },
     snet_B = {
       name             = "snet-B-${local.env}"
       address_prefixes = ["10.0.2.0/24"]
-      delegations = []
+      delegations      = []
     },
     snet_C = {
       name             = "snet-C-${local.env}"
       address_prefixes = ["10.0.3.0/24"]
+      delegations      = []
+    },
+    snet_C_Delegated = {
+      name             = "snet-C-${local.env}"
+      address_prefixes = ["10.0.4.0/24"]
       delegations = [
         {
           name                    = "web"
@@ -35,12 +40,13 @@ locals {
         }
       ]
     }
+
   }
 
   # Public IP
   pip_name              = "pip-infra-${local.env}"
   pip_allocation_method = "Static"
-  pip_sku               = "Basic"
+  pip_sku               = "Standard"
 
   # Azurerm Firewall Policy
   afwp_name = "afwp-infra-${local.env}"
