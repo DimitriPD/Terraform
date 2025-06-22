@@ -1,5 +1,5 @@
 output "id" {
-  value = azurerm_network_interface.nic
+  value = azurerm_network_interface.nic.id
 }
 
 output "name" {
