@@ -48,6 +48,18 @@ locals {
   pip_allocation_method = "Static"
   pip_sku               = "Standard"
 
+  # Network Interface
+  nic_list = {
+    nic_VM_A = {
+      name      = "nic-VM-A-${local.env}"
+      subnet_id = module.snet_infra["snet_A"].id
+    },
+    nic_VM_B = {
+      name      = "nic-VM-B-${local.env}"
+      subnet_id = module.snet_infra["snet_B"].id
+    }
+  }
+
   # Azurerm Firewall Policy
   afwp_name = "afwp-infra-${local.env}"
   afwp_sku  = "Basic"
@@ -74,21 +86,21 @@ locals {
           rules = [
             {
               name                  = "Allow-ICMP-Snet-A-to-Snet-B"
-              source_addresses      = [module.snet_infra["snet_A"].address_prefixes[0]]
+              source_addresses      = [module.nic_infra["nic_VM_A"].private_interface_ip]
               destination_ports     = ["*"]
-              destination_addresses = [module.snet_infra["snet_B"].address_prefixes[0]]
+              destination_addresses = [module.nic_infra["nic_VM_B"].private_interface_ip]
               protocols             = ["ICMP"]
             },
             {
               name                  = "Allow-ICMP-Snet-B-to-Snet-A"
-              source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
+              source_addresses      = [module.nic_infra["nic_VM_B"].private_interface_ip]
               destination_ports     = ["*"]
-              destination_addresses = [module.snet_infra["snet_A"].address_prefixes[0]]
+              destination_addresses = [module.nic_infra["nic_VM_A"].private_interface_ip]
               protocols             = ["ICMP"]
             },
             {
               name                  = "Allow-HTTPS-Snet-B-to-Function-PEP"
-              source_addresses      = [module.snet_infra["snet_B"].address_prefixes[0]]
+              source_addresses      = [module.nic_infra["nic_VM_B"].private_interface_ip]
               destination_ports     = ["443"]
               destination_addresses = [module.pep_infra["pep_func"].private_endpoint_ip]
               protocols             = ["TCP"]
@@ -146,22 +158,22 @@ locals {
           protocol                   = "Icmp"
           source_port_range          = "*"
           destination_port_range     = "*"
-          source_address_prefix      = module.snet_infra["snet_B"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_B"].private_interface_ip
           priority                   = 100
           direction                  = "Inbound"
           access                     = "Allow"
-          destination_address_prefix = module.snet_infra["snet_A"].address_prefixes[0]
+          destination_address_prefix = module.nic_infra["nic_VM_A"].private_interface_ip
         },
         {
           name                       = "Allow-ICMP-Outbound"
           protocol                   = "Icmp"
           source_port_range          = "*"
           destination_port_range     = "*"
-          source_address_prefix      = module.snet_infra["snet_A"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_A"].private_interface_ip
           priority                   = 100
           direction                  = "Outbound"
           access                     = "Allow"
-          destination_address_prefix = module.snet_infra["snet_B"].address_prefixes[0]
+          destination_address_prefix = module.nic_infra["nic_VM_B"].private_interface_ip
         },
         {
           name                       = "Deny-All-Inbound"
@@ -195,29 +207,29 @@ locals {
           protocol                   = "Icmp"
           source_port_range          = "*"
           destination_port_range     = "*"
-          source_address_prefix      = module.snet_infra["snet_A"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_A"].private_interface_ip
           priority                   = 100
           direction                  = "Inbound"
           access                     = "Allow"
-          destination_address_prefix = module.snet_infra["snet_B"].address_prefixes[0]
+          destination_address_prefix = module.nic_infra["nic_VM_B"].private_interface_ip
         },
         {
           name                       = "Allow-ICMP-Outbound"
           protocol                   = "Icmp"
           source_port_range          = "*"
           destination_port_range     = "*"
-          source_address_prefix      = module.snet_infra["snet_B"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_B"].private_interface_ip
           priority                   = 100
           direction                  = "Outbound"
           access                     = "Allow"
-          destination_address_prefix = module.snet_infra["snet_A"].address_prefixes[0]
+          destination_address_prefix = module.nic_infra["nic_VM_A"].private_interface_ip
         },
         {
-          name                       = "Allow-HTTPS-to-Function"
+          name                       = "Allow-HTTPS-Outbound-to-Function"
           protocol                   = "Tcp"
           source_port_range          = "*"
           destination_port_range     = "443"
-          source_address_prefix      = module.snet_infra["snet_B"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_B"].private_interface_ip
           priority                   = 110
           direction                  = "Outbound"
           access                     = "Allow"
@@ -255,7 +267,7 @@ locals {
           protocol                   = "Tcp"
           source_port_range          = "*"
           destination_port_range     = "443"
-          source_address_prefix      = module.snet_infra["snet_B"].address_prefixes[0]
+          source_address_prefix      = module.nic_infra["nic_VM_B"].private_interface_ip
           priority                   = 110
           direction                  = "Inbound"
           access                     = "Allow"
@@ -316,9 +328,9 @@ locals {
 
   # Subnet Network Security Group Association
   snet_nsg_assoc_list = {
-    snet_A = "nsg_A"
-    snet_B = "nsg_B"
-    snet_C = "nsg_C"
+    snet_A           = "nsg_A"
+    snet_B           = "nsg_B"
+    snet_C           = "nsg_C"
     snet_C_Delegated = "nsg_C_Delegated"
   }
 
@@ -378,9 +390,9 @@ locals {
 
   # Subnet Route Table Association
   snet_rt_assoc_list = {
-    snet_A = "rt_A"
-    snet_B = "rt_B"
-    snet_C = "rt_C"
+    snet_A           = "rt_A"
+    snet_B           = "rt_B"
+    snet_C           = "rt_C"
     snet_C_Delegated = "rt_C_Delegated"
   }
 }
@@ -430,6 +442,20 @@ module "pip_infra" {
   depends_on = [module.rg_infra]
 }
 
+module "nic_infra" {
+  source = "../modules/network/network_interface"
+
+  for_each = local.nic_list
+
+  region    = local.region
+  tags      = local.tags
+  rg_name   = local.rg_infra_name
+  nic_name  = each.value.name
+  subnet_id = each.value.subnet_id
+
+  depends_on = [module.snet_infra]
+}
+
 module "afwp_infra" {
   source = "../modules/network/firewall_policy"
 
@@ -463,7 +489,8 @@ module "afw_infra" {
     module.rg_infra,
     module.snet_infra,
     module.afwp_infra,
-    module.pip_infra
+    module.pip_infra,
+    module.nic_infra
   ]
 }
 
@@ -512,7 +539,10 @@ module "nsg_infra" {
   nsg_name       = each.value.name
   security_rules = each.value.security_rules
 
-  depends_on = [module.pep_infra]
+  depends_on = [
+    module.pep_infra,
+    module.nic_infra
+  ]
 }
 
 module "snet_nsg_assoc" {
