@@ -64,7 +64,7 @@ locals {
   afw_rcg_firewall_policy_id = module.afwp_infra.id
   afw_rcg_list = {
     net_rcg = {
-      name     = "Net-Coll-${local.env}"
+      name     = "DefaultNetworkRuleCollectionGroup"
       priority = 100
       collections = [
         {
