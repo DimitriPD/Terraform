@@ -132,7 +132,7 @@ Este projeto provisiona uma infraestrutura completa no Azure utilizando Terrafor
 
 ## Como usar
 
-1. Configure suas credenciais no arquivo `credentials.tfvars`.
+1. Configure suas credenciais em arquivo `.tfvars`.
 2. Execute `terraform init` para inicializar o projeto.
 3. Execute `terraform plan` para visualizar as mudanças.
 4. Execute `terraform apply` para provisionar a infraestrutura.
