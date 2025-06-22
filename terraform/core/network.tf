@@ -60,8 +60,9 @@ locals {
   afw_snet_id            = module.snet_infra["snet_firewall"].id
   afw_management_snet_id = module.snet_infra["snet_firewall_management"].id
 
-  # Azure Firewall Network Rule Collection
-  afw_net_coll_list = {
+  # Azure Firewall Rule Collection Group
+  afw_rcg_firewall_policy_id = module.afwp_infra.id
+  afw_rcg_net_list = {
     afw_net_coll_allow = {
       name     = "Net-Coll-Allow-${local.env}"
       priority = 100
@@ -314,7 +315,7 @@ locals {
           name                   = "udr-to-function-pep"
           address_prefix         = module.pep_infra["pep_func"].private_endpoint_ip
           next_hop_type          = "VirtualAppliance"
-          next_hop_in_ip_address = module.afw_infra.private_firewall_ip
+          next_hop_in_ip_address = "${module.afw_infra.private_firewall_ip}/32"
         }
       ]
     },
@@ -421,17 +422,16 @@ module "afw_infra" {
   ]
 }
 
-module "afw_net_coll_infra" {
-  source = "../modules/network/firewall_network_rule_collection"
+module "afwp_rcg_infra" {
+  source = "../modules/network/firewall_policy_rule_collection_group"
 
-  for_each = local.afw_net_coll_list
+  for_each = local.afw_rcg_net_list
 
-  rg_name           = local.rg_infra_name
-  afw_name          = local.afw_name
-  afw_net_coll_name = each.value.name
-  priority          = each.value.priority
-  action            = each.value.action
-  rules             = each.value.rules
+  firewall_policy_id = local.afw_rcg_firewall_policy_id
+  afwp_rcg_name      = each.value.name
+  priority           = each.value.priority
+  action             = each.value.action
+  rules              = each.value.rules
 
   depends_on = [module.afw_infra]
 }
