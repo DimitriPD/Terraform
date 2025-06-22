@@ -1,0 +1,12 @@
+Requisitos 
+● As máquinas virtuais (VMs Linux) devem se comunicar entre si exclusivamente por meio 
+do protocolo ICMP. 
+● É necessário que todo o tráfego seja direcionado ao firewall para tratamento, garantindo 
+que apenas o ICMP seja liberado, tanto no firewall quanto nas NSGs (Network Security 
+Groups). 
+● Cada sub-rede deve possuir uma tabela de rotas específica para redirecionar o tráfego 
+ao firewall. 
+● Por fim, uma Function App deve ser implantada com Private Endpoint para assegurar 
+que o tráfego permaneça interno. 
+● Uma das máquinas precisa ter acesso ao Function App Private Endpoint  no protocolo 
+HTTPS.

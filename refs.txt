@@ -1,0 +1,8 @@
+https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
+https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
+https://registry.terraform.io/providers/Azure/azapi/latest/docs
+https://www.techtarget.com/searchsecurity/answer/Comparing-firewalls-Differences-between-an-inbound-outbound-firewall
+https://learn.microsoft.com/en-us/azure/networking/fundamentals/networking-overview
+https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/virtualNetworks/subnets?pivots=deployment-language-terraform
+https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table#prerequisites
+https://learn.microsoft.com/pt-br/azure/private-link/private-endpoint-overview#private-link-resource
