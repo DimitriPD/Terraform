@@ -2,7 +2,7 @@ locals {
   # App Service Plan configuration
   asp_name = "asp-service-${local.env}"
   os_type  = "Linux"
-  sku_name = "Y1"
+  sku_name = "B1"
 
   # Function App configuration
   func_name = "func-service-${local.env}"

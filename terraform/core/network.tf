@@ -36,6 +36,7 @@ locals {
   afw_sku_tier           = "Basic"
   afw_firewall_policy_id = module.afwp_infra.id
   afw_snet_id            = module.snet_infra["snet_firewall"].id
+  afw_management_snet_id = module.snet_infra["snet_firewall_management"].id
 
   # Azure Firewall Network Rule Collection
   afw_net_coll_list = {
@@ -373,6 +374,7 @@ module "afw_infra" {
   sku_tier           = local.afw_sku_tier
   firewall_policy_id = local.afw_firewall_policy_id
   snet_id            = local.afw_snet_id
+  management_snet_id = local.afw_management_snet_id
 
   depends_on = [
     module.rg_infra,

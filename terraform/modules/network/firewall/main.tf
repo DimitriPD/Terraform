@@ -7,6 +7,7 @@ locals {
   sku_tier           = var.sku_tier
   firewall_policy_id = var.firewall_policy_id
   snet_id            = var.snet_id
+  management_snet_id = var.management_snet_id
 }
 
 resource "azurerm_firewall" "afw" {
@@ -21,5 +22,10 @@ resource "azurerm_firewall" "afw" {
   ip_configuration {
     name      = "configuration"
     subnet_id = local.snet_id
+  }
+
+  ip_configuration {
+    name      = "management"
+    subnet_id = local.management_snet_id
   }
 }

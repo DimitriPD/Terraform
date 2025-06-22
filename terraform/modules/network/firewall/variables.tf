@@ -37,3 +37,8 @@ variable "snet_id" {
   description = "ID of the subnet where the Azure Firewall will be deployed"
   type        = string
 }
+
+variable "management_snet_id" {
+  description = "ID of the management subnet for the Azure Firewall"
+  type        = string
+}
