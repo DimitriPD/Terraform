@@ -319,7 +319,7 @@ locals {
     snet_A = "nsg_A"
     snet_B = "nsg_B"
     snet_C = "nsg_C"
-    nsg_C_Delegated = "snet_C_Delegated"
+    snet_C_Delegated = "nsg_C_Delegated"
   }
 
   # Route Table
